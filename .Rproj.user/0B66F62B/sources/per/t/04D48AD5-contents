@@ -1,0 +1,87 @@
+---
+title: "All Games Data"
+output: 
+  html_document:
+    theme: yeti
+---
+
+```{r include= FALSE}
+source("/Users/jennaryan/Documents/R Projects/best-scratch-offs/mn_data_prep.R")
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE)
+```
+
+Data for all current Minnesota scratch games including overall odds, odds of \>\$500 winner, age of game, number of tickets in game, winning tickets \>\$500 claimed and remaining
+
+### Overall Odds {style="text-align: center"}
+
+```{r}
+odds_table <-cleaned_df %>% 
+  arrange(desc(Date)) %>% 
+  filter(Date == Date[1]) %>% 
+  select(game_amount, Game, overall_odds) %>% 
+  distinct(Game, .keep_all = TRUE) %>% 
+  arrange(overall_odds)
+
+DT::datatable(odds_table)
+```
+
+### Odds of \$500 or Greater {style="text-align: center"}
+
+```{r}
+odds_500 <- cleaned_df %>% 
+  arrange(desc(Date)) %>% 
+  filter(Date == Date[1]) %>% 
+  group_by(Game, game_amount) %>% 
+  summarise(total_prizes_500 =sum(total_prizes_500),
+            no_tickets =no_tickets[1],
+            odds_500 = round(no_tickets / total_prizes_500,0)) %>% 
+  select(game_amount,Game,odds_500) %>% 
+  arrange(odds_500)
+
+DT::datatable(odds_500)
+```
+
+### Game Age {style="text-align: center"}
+
+```{r}
+age_table <- cleaned_df %>% 
+  arrange(desc(Date)) %>% 
+  filter(Date == Date[1]) %>% 
+  distinct(Game, .keep_all = TRUE) %>% 
+  select(game_amount, Game, game_age) %>% 
+  drop_na() %>% 
+  arrange(game_age)
+
+DT::datatable(age_table)
+```
+
+### Number of Tickets in Game {style="text-align: center"}
+
+```{r}
+number_tickets_table <-cleaned_df %>% 
+  arrange(desc(Date)) %>% 
+  filter(Date == Date[1]) %>% 
+  distinct(Game, .keep_all = TRUE) %>% 
+  select(game_amount, Game, no_tickets) %>% 
+  drop_na() %>% 
+  arrange(no_tickets)
+
+DT::datatable(number_tickets_table)
+```
+
+### % of Winning Tickets \>\$500 Claimed {style="text-align: center"}
+
+```{r}
+claim_remain_table <-
+  cleaned_df %>% 
+  arrange(desc(Date)) %>% 
+  filter(Date == Date[1]) %>% 
+  select(game_amount, Game, Prize, Claimed, Remaining, percent_claimed_500) %>%
+  arrange(percent_claimed_500) %>% 
+  mutate(percent_claimed_500 = paste0(round(percent_claimed_500,1),"%")) %>% 
+  rename(`% Claimed` = percent_claimed_500)
+
+DT::datatable(claim_remain_table)
+```
