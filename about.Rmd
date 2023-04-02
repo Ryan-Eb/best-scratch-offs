@@ -1,5 +1,10 @@
 ---
-title: "About This Website"
+title: "About best-scratch-offs.com"
+output: 
+  html_document:
+    theme: yeti
 ---
 
-More about this website.
+Data is collected from state lottery websites
+
+

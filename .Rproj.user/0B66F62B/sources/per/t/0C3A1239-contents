@@ -5,11 +5,12 @@ navbar:
   left:
     - text: "Home"
       href: index.html
-    - text: "About"
-      href: about.html
     - text: "States"
       menu:
         - text: "Florida"
           href: fl.html
         - text: "Minnesota"
           href: mn.html
+    - text: "About"
+      href: about.html
+

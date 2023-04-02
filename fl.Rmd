@@ -126,11 +126,11 @@ DT::datatable(best_games_tbl,
 
 Pay attention to the "Return on 1\$" column, this is how much money you can expect to win for every dollar you spend on that game. The closer that number gets to \$1 means the better your chances of winning!
 
-The Navbar at the top of the page has links to detailed analysis for all game ticket amounts as well as detailed information for all games such as prizes remaining, current odds, and more.
+[All Florida Games Data](https://best-scratch-offs.com/fl_games_data)
+
+Click the link above for detailed information about all current florida scratch off games including overall odds and number of prizes remaining.
 
 Going for the big one? We keep track of all prizes \$5 million or greater yet to be claimed.
-
-[All Florida Games Data](https://best-scratch-offs.com/fl_games_data)
 
 <br>
 

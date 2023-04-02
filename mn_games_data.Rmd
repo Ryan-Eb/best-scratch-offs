@@ -1,5 +1,5 @@
 ---
-title: "All Games Data"
+title: "Minnesota Scratch Games"
 output: 
   html_document:
     theme: yeti
