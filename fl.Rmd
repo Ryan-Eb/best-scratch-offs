@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = FALSE,
                       fig.align = "center")
 
 
-source("/Users/jennaryan/Documents/R Projects/best-scratch-offs/fl_data_prep.R")
+source("/Users/jennaryan/Documents/GitHub/best-scratch-offs/fl_data_prep.R")
 ```
 
 ```{r echo=FALSE, out.width="100%" ,out.extra='style="float:right; margin: auto; max-width:500px"'}

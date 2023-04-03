@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = FALSE,
                       fig.align = "center")
 
 
-source("/Users/jennaryan/Documents/R Projects/best-scratch-offs/fl_data_prep.R")
+source("/Users/jennaryan/Documents/GitHub/best-scratch-offs/fl_data_prep.R")
 ```
 
 #### Florida Scratch-Off Current Game Data {style="text-align: center"}

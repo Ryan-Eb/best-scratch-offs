@@ -7,7 +7,7 @@ output:
 
 ```{r include=FALSE}
 
-source("/Users/jennaryan/Documents/R Projects/best-scratch-offs/mn_data_prep.R")
+source("/Users/jennaryan/Documents/GitHub/best-scratch-offs/mn_data_prep.R")
 
 knitr::opts_chunk$set(echo = FALSE, 
                       warning = FALSE, 
