@@ -11,6 +11,8 @@ navbar:
           href: fl.html
         - text: "Minnesota"
           href: mn.html
+        - text: "North Carolina"
+          href: nc.html
     - text: "About"
       href: about.html
 
