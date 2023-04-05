@@ -1,0 +1,40 @@
+library(tidyverse)
+library(lubridate)
+library(rvest)
+
+
+url <- read_html("https://www.sceducationlottery.com/Games/InstantGames#")
+
+link_list <-url %>% html_nodes("a") %>% html_attr("href") %>% str_subset("gameId") %>% unique()
+
+
+game_data <- data.frame()
+for (i in 1:length(link_list)) {
+
+  game_url <-read_html(paste0("https://www.sceducationlottery.com",link_list[i])) 
+  
+  x <- game_url %>% html_nodes("td") %>% html_text2() %>% 
+    matrix(ncol = 5, byrow = TRUE) %>% 
+    as.data.frame() %>% 
+    rename(prize_amount = V1,
+           remaining_prizes = V2,
+           value_remaining_prizes = V3,
+           total_prize = V4,
+           value_total_prize = V5) %>% 
+    mutate(ticket_price = game_url %>% html_node(".info-block:nth-child(2)") %>% html_text2() %>% str_split("\\$", simplify = TRUE) %>% .[,2]) %>% 
+    mutate(overall_odds = game_url %>% html_node(".ticket-example+ .row") %>% html_text() %>% str_split("Overall Odds: 1 in ") %>% .[[1]] %>% .[2] %>% str_split("Top") %>% .[[1]] %>% .[1]) %>% 
+    mutate(start_date = game_url %>% html_node(".info-block:nth-child(3)") %>% html_text2() %>% str_split("\n\n\n", simplify = TRUE) %>% .[2]) %>% 
+    mutate(date_updated = game_url %>% html_node(".info-block:nth-child(1)") %>% html_text2() %>% str_split("\n\n\n", simplify = TRUE) %>% .[2]) %>% 
+    mutate(game_number = link_list[i] %>% str_split("Id=", simplify = TRUE) %>% .[,2]) %>% 
+    mutate(game_name = game_url %>% html_node("h1") %>% html_text2() %>% str_sub(start = 3L, end = -2L)) %>% 
+    mutate(scrape_date = today())
+  
+  game_data <- bind_rows(game_data,x) 
+  print(i)
+}
+
+game_data <- distinct(game_data, .keep_all = TRUE)
+
+#set working directory to fl lottery folder and write to csv with date of scrape
+setwd("/Users/jennaryan/Documents/R Projects/sc lottery/daily_csv_sc")
+write.csv(game_data,paste0("nc_scratch_prizes",today(),".csv"))

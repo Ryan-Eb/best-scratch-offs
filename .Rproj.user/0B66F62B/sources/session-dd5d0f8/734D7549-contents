@@ -1,0 +1,187 @@
+---
+title: "South Carolina Scratch Games"
+output: 
+  html_document:
+    theme: yeti
+---
+
+```{r include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE,
+                      fig.align = "center")
+
+
+source("/Users/jennaryan/Documents/GitHub/best-scratch-offs/sc_data_prep.R")
+```
+
+```{r echo=FALSE, out.width="100%" ,out.extra='style="float:right; margin: auto; max-width:500px"'}
+
+x1 = -81.5
+y1 = 34.2
+NC_logo <- ggplot2::map_data("state","south carolina") %>% 
+  ggplot(aes(long,lat))+
+  geom_polygon(fill = "white", color = "black", linewidth=2)+
+      annotate("rect",
+           xmin = x1+.4,
+           xmax = x1+2.4,
+           ymin = y1+.4,
+           ymax = y1+2.4,
+           fill = "white",
+           color = "black",
+           linetype = 2)+
+      annotate("rect",
+           xmin = x1+.2,
+           xmax = x1+2.2,
+           ymin = y1+.2,
+           ymax = y1+2.2,
+           fill = "white",
+           color = "black",
+           linetype = 2)+
+  annotate("rect",
+           xmin = x1,
+           xmax = x1+2,
+           ymin = y1,
+           ymax = y1+2,
+           fill = "white",
+           color = "black",
+           linetype = 2)+
+    annotate("rect",
+           xmin = c(x1+.1, x1+.5, x1+.9, x1+1.3, x1+1.7),
+           xmax = c(x1+.3, x1+.7, x1+1.1, x1+1.5, x1+1.9),
+           ymin = y1+.1,
+           ymax = y1+.3)+
+      annotate("rect",
+           xmin = c(x1+.1, x1+.5, x1+.9, x1+1.3, x1+1.7),
+           xmax = c(x1+.3, x1+.7, x1+1.1, x1+1.5, x1+1.9),
+           ymin = y1+.4,
+           ymax = y1+.6)+
+        annotate("rect",
+           xmin = c(x1+.1, x1+.5, x1+.9, x1+1.3, x1+1.7),
+           xmax = c(x1+.3, x1+.7, x1+1.1, x1+1.5, x1+1.9),
+           ymin = y1+.7,
+           ymax = y1+.9)+
+    annotate("text",
+             x = x1+1,
+             y = y1 +1.3,
+             label = "$ $ $ $",
+             size = 5)+
+      annotate("text",
+             x = x1+1,
+             y = y1 +1.7,
+             label = "WINNER",
+             size = 5)+
+    annotate("text",
+             x = x1+1.3,
+             y = y1+2.9,
+             label = "best-scratch-offs.com/sc",
+             size = 5,
+             fontface = "bold")+
+ coord_quickmap()+
+  theme_bw()+
+  theme(panel.grid = element_blank(),
+        panel.border = element_blank(),
+        line = element_blank(),
+        text = element_blank(),
+        plot.margin = margin(0,0,0,0))
+
+NC_logo
+```
+
+::: {style="text-align:center"}
+## `r scales::label_dollar()(total_amount_remain)`
+
+#### Prize \$\$ Available to Win Now
+
+<br>
+
+## `r scales::label_comma()(avg_sold_per_day)`
+
+#### Scratch-Off Tickets are sold Everyday in North Carolina
+
+<br>
+
+## `r scales::label_comma()(greater_500_remain)`
+
+#### Prizes greater than \$500 Available to Win Now
+
+There are millions of dollars to be won in South Carolina scratch-offs! Our experts have analyzed all the scratch off games in Florida and using advanced data analytics will help you play the games with the best chance of winning.
+:::
+
+<br><br>
+
+------------------------------------------------------------------------
+
+#### Best Games to Play Today: {style="text-align: center"}
+
+```{r}
+library(DT)
+
+DT::datatable(best_games_tbl, 
+              colnames = c("Ticket Cost", "Name of Game", "ROI %", "Return on $1"),
+              rownames = FALSE,
+              options = list(dom = "t",
+                             columnDefs = list(list(className = 'dt-center', targets = 0:3))))
+```
+
+Pay attention to the "Return on 1\$" column, this is how much money you can expect to win for every dollar you spend on that game. This is based on calculations from the number of prizes remaining and the number of tickets estimated yet to be sold
+
+[All South Carolina Games Data](https://best-scratch-offs.com/sc.html)
+
+Click the link above for detailed information about all current South Carolina scratch off games including overall odds and number of prizes remaining.
+
+Going for the big one? We keep track of all prizes \$5 million or greater yet to be claimed.
+
+<br>
+
+#### **Top Prize Tracker** {style="text-align: center"}
+
+```{r include=FALSE}
+#datafrome for topprize tracker and unused chart
+
+top_pize_tracker <- clean_df %>% 
+  mutate(game_name = str_replace_all(game_name, "[^a-zA-Z0-9]", " ")) %>% 
+  filter(percent_claimed < 100) %>% 
+  filter(prize_amount >= 1e6)
+
+top_prize_plot1 <- top_pize_tracker %>% 
+  ggplot(aes(x = game_age, y = percent_claimed, color = game_name ))+
+  geom_point()+
+  geom_label_repel(data = top_pize_tracker %>% filter(scrape_date==max(scrape_date)), aes(label = scales::label_dollar()(prize_amount)), 
+             show.legend = FALSE)+
+  theme_bw()+
+  labs(x = "Age of Game - Days",
+       y = "% of Winning Tickets Claimed",
+       title = "% of Winning Tickets Claimed",
+       caption = "*prizes $1mil or greater")+
+  theme(legend.title = element_blank(),
+        legend.text = element_text(size = 12),
+        legend.position = "bottom",
+        plot.caption = element_text(face = "bold"))+
+  guides(color = guide_legend(nrow = 3))
+
+top_prize_plot1
+```
+
+```{r}
+top_prize_plot2 <- top_pize_tracker %>% 
+  ggplot(aes(x = game_age, y = remaining_prizes, color = game_name ))+
+  geom_point()+
+  geom_label_repel(data = top_pize_tracker %>% filter(scrape_date==max(scrape_date)),aes(label = scales::label_dollar()(prize_amount)), 
+             show.legend = FALSE)+
+  scale_y_continuous(breaks = scales::pretty_breaks())+
+  theme_bw()+
+  labs(x = "Age of Game - Days",
+       y = "# of Winning Tickets Remaining",
+       title = "Winning Tickets Remaining",
+       caption = "*prizes $2mil or greater")+
+  theme(legend.title = element_blank(),
+        legend.text = element_text(size = 12),
+        legend.position = "bottom",
+        plot.caption = element_text(face = "bold"))+
+  guides(color = guide_legend(nrow = 3))
+
+top_prize_plot2
+```
+
+*Disclaimer: The information provided on this website is for educational and entertainment purposes only. We do not guarantee the accuracy or reliability of any information presented. Our recommendations and analysis should not be construed as financial advice, and we are not responsible for any financial losses or damages that may occur. We do not encourage or endorse any form of gambling and recommend that individuals conduct their own research before making any decisions. By using this website, you agree to hold us harmless from any liability arising from your use of the information presented.*
