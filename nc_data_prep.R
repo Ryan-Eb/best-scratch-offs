@@ -8,7 +8,7 @@ daily_csv <- list.files("/Users/jennaryan/Documents/R Projects/nc lottery/daily_
 
 df <- bind_rows(daily_csv)
 
-#NOTE: as of April 5th filtered out game number 869 because it appear to be dobuled
+
 clean_df <- df %>% 
   select(-`...1`) %>% 
   mutate(start_odds = as.numeric(odds)) %>% 
@@ -29,8 +29,7 @@ clean_df <- df %>%
   mutate(percent_claimed = prizes_claimed / total_prize * 100) %>% 
   mutate(game_age = as.numeric(scrape_date - start_date)) %>% 
   mutate(avg_tickets_sold_per_day = tickets_sold / game_age) %>% 
-  mutate(ticket_cost_num = as.numeric(str_sub(ticket_price, start = 2L, end = -1L))) %>% 
-  filter(game_number != "869")
+  mutate(ticket_cost_num = as.numeric(str_sub(ticket_price, start = 2L, end = -1L)))
 
 
 buy_out_df <- clean_df %>% 
@@ -57,7 +56,7 @@ avg_sold_per_day <- clean_df %>%
   arrange(scrape_date) %>% 
   summarise(days_since_last_scrape = as.numeric(scrape_date[n()]-scrape_date[n()-1]),
             number_tickets_diff = number_tickets[n()] - number_tickets[n()-1], 
-            tickets_sold_since_last_scrape = tickets_remain[n()-1] - tickets_remain[n()]) %>% 
+            tickets_sold_since_last_scrape = number_tickets_diff + tickets_remain[n()-1] - tickets_remain[n()]) %>% 
   summarise(avg_per_day = tickets_sold_since_last_scrape/days_since_last_scrape) %>% 
   as.numeric() %>% 
   round(0)

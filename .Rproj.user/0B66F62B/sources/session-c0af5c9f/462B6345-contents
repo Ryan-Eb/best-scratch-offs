@@ -46,15 +46,9 @@ buy_out_df <- clean_df %>%
   ungroup()
 
 
-
 avg_sold_per_day <- clean_df %>% 
-  filter(scrape_date == max(scrape_date) | scrape_date == max(scrape_date)-1) %>% 
   group_by(scrape_date) %>%
-  distinct(game_number, .keep_all = TRUE) %>%
-  group_by(game_number) %>% 
-  filter(n()==2) %>% 
-  ungroup() %>% 
-  group_by(scrape_date) %>% 
+  distinct(game_number, .keep_all = TRUE) %>% 
   summarise(tickets_remain = sum(tickets_remain),
             number_tickets=sum(number_tickets)) %>% 
   arrange(scrape_date) %>% 

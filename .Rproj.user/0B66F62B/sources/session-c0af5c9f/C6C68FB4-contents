@@ -2,32 +2,34 @@ library(tidyverse)
 library(lubridate)
 library(ggrepel)
 
-daily_csv <- list.files("/Users/jennaryan/Documents/R Projects/sc lottery/daily_csv_sc",
+daily_csv <- list.files("/Users/jennaryan/Documents/R Projects/nc lottery/daily_csv_nc",
                         full.names = TRUE) %>% 
   lapply(read_csv)
 
 df <- bind_rows(daily_csv)
 
-clean_df <-df %>% 
-  select(-`...1`) %>%
-  relocate(game_number:game_name, .before = prize_amount) %>% 
-  mutate(prize_amount = as.numeric(gsub(",", "",str_sub(prize_amount, start=2L, end = -1L)))) %>% 
-  mutate(start_overall_odds = as.numeric(overall_odds)) %>% 
+
+clean_df <- df %>% 
+  select(-`...1`) %>% 
+  mutate(start_odds = as.numeric(odds)) %>% 
+  mutate(start_overall_odds = as.numeric(str_sub(overall_odds, start = 6L, end =-1L))) %>% 
   group_by(game_number,scrape_date) %>% 
   mutate(total_prizes_game = sum(total_prize)) %>% 
   ungroup() %>% 
   mutate(number_tickets = start_overall_odds * total_prizes_game) %>% 
+  mutate(prize_amount = as.numeric(gsub(",", "",str_sub(prize_amount, start=2L, end = -1L)))) %>%
   mutate(prizes_claimed = total_prize - remaining_prizes) %>% 
   group_by(game_number,scrape_date) %>% 
   mutate(tickets_sold = sum(prizes_claimed) * start_overall_odds) %>% 
   ungroup() %>% 
   mutate(tickets_remain = number_tickets - tickets_sold) %>% 
   mutate(current_odds = tickets_remain / remaining_prizes) %>% 
-  mutate(start_date = mdy(start_date)) %>% 
+  mutate(start_date = mdy(launch_date)) %>% 
   mutate(game_number = as.factor(game_number)) %>% 
   mutate(percent_claimed = prizes_claimed / total_prize * 100) %>% 
   mutate(game_age = as.numeric(scrape_date - start_date)) %>% 
-  mutate(avg_tickets_sold_per_day = tickets_sold / game_age) 
+  mutate(avg_tickets_sold_per_day = tickets_sold / game_age) %>% 
+  mutate(ticket_cost_num = as.numeric(str_sub(ticket_price, start = 2L, end = -1L)))
 
 
 buy_out_df <- clean_df %>% 
@@ -49,10 +51,12 @@ buy_out_df <- clean_df %>%
 avg_sold_per_day <- clean_df %>% 
   group_by(scrape_date) %>%
   distinct(game_number, .keep_all = TRUE) %>% 
-  summarise(tickets_remain = sum(tickets_remain)) %>% 
+  summarise(tickets_remain = sum(tickets_remain),
+            number_tickets = sum(number_tickets)) %>% 
   arrange(scrape_date) %>% 
   summarise(days_since_last_scrape = as.numeric(scrape_date[n()]-scrape_date[n()-1]),
-            tickets_sold_since_last_scrape = tickets_remain[n()-1] - tickets_remain[n()]) %>% 
+            number_tickets_diff = number_tickets[n()] - number_tickets[n()-1], 
+            tickets_sold_since_last_scrape = number_tickets_diff + tickets_remain[n()-1] - tickets_remain[n()]) %>% 
   summarise(avg_per_day = tickets_sold_since_last_scrape/days_since_last_scrape) %>% 
   as.numeric() %>% 
   round(0)
