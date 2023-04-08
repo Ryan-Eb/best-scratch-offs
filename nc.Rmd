@@ -126,7 +126,7 @@ DT::datatable(best_games_tbl,
 
 Pay attention to the "Return on 1\$" column, this is how much money you can expect to win for every dollar you spend on that game. This is based on calculations from the number of prizes remaining and the number of tickets estimated yet to be sold
 
-[All North Carolina Games Data](https://best-scratch-offs.com/nc.html)
+All North Carolina Games Data
 
 Click the link above for detailed information about all current North Carolina scratch off games including overall odds and number of prizes remaining.
 
