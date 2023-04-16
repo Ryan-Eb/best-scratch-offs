@@ -1,8 +1,0 @@
-
-all_state_csv_2023_04_08 <- read_csv("all_state_csv-2023-04-08")
-
-df <- all_state_csv_2023_04_08
-
-df %>% 
-  group_by(state,game_number,scrape_date) %>% 
-  summarise(number_tickets = sum(total_prizes)*mean(overall_odds))

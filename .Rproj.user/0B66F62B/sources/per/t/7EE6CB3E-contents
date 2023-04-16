@@ -1,5 +1,5 @@
 ---
-title: "North Carolina Scratch Games"
+title: "Illinois Scratch Games"
 output: 
   html_document:
     theme: yeti
@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = FALSE,
 
 source("/Users/jennaryan/Documents/GitHub/all_lotto_states/all_states_analysis.R")
 
-st = "NC"
+st = "IL"
 
 avg_sold_per_day <- tsd %>% 
   filter(state == st) %>% 
@@ -42,12 +42,12 @@ top_remaining <- df %>%
 
 ```{r echo=FALSE, out.width="100%" ,out.extra='style="float:right; margin: auto; max-width:500px"'}
 
-x1 = -81.5
-y1 = 33.2
-NC_logo <- ggplot2::map_data("state","north carolina") %>% 
+x1 = -90.8
+y1 = 38
+IL_logo <- ggplot2::map_data("state","illinois") %>% 
   ggplot(aes(long,lat))+
   geom_polygon(fill = "white", color = "black", linewidth=2)+
-      annotate("rect",
+  annotate("rect",
            xmin = x1+.4,
            xmax = x1+2.4,
            ymin = y1+.4,
@@ -55,7 +55,7 @@ NC_logo <- ggplot2::map_data("state","north carolina") %>%
            fill = "white",
            color = "black",
            linetype = 2)+
-      annotate("rect",
+  annotate("rect",
            xmin = x1+.2,
            xmax = x1+2.2,
            ymin = y1+.2,
@@ -71,45 +71,46 @@ NC_logo <- ggplot2::map_data("state","north carolina") %>%
            fill = "white",
            color = "black",
            linetype = 2)+
-    annotate("rect",
+  annotate("rect",
            xmin = c(x1+.1, x1+.5, x1+.9, x1+1.3, x1+1.7),
            xmax = c(x1+.3, x1+.7, x1+1.1, x1+1.5, x1+1.9),
            ymin = y1+.1,
            ymax = y1+.3)+
-      annotate("rect",
+  annotate("rect",
            xmin = c(x1+.1, x1+.5, x1+.9, x1+1.3, x1+1.7),
            xmax = c(x1+.3, x1+.7, x1+1.1, x1+1.5, x1+1.9),
            ymin = y1+.4,
            ymax = y1+.6)+
-        annotate("rect",
+  annotate("rect",
            xmin = c(x1+.1, x1+.5, x1+.9, x1+1.3, x1+1.7),
            xmax = c(x1+.3, x1+.7, x1+1.1, x1+1.5, x1+1.9),
            ymin = y1+.7,
            ymax = y1+.9)+
-    annotate("text",
-             x = x1+1,
-             y = y1 +1.3,
-             label = "$ $ $ $",
-             size = 5)+
-      annotate("text",
-             x = x1+1,
-             y = y1 +1.7,
-             label = "WINNER",
-             size = 5)+
-    annotate("text",
-             x = x1+1.3,
-             y = y1+2.9,
-             label = "best-scratch-offs.com/nc",
-             size = 5,
-             fontface = "bold")+
- coord_quickmap()+
+  annotate("text",
+           x = x1+1,
+           y = y1 +1.3,
+           label = "$ $ $ $",
+           size = 4)+
+  annotate("text",
+           x = x1+1,
+           y = y1 +1.7,
+           label = "WINNER",
+           size = 4)+
+  annotate("label",
+           x = x1+1.3,
+           y = y1+2.9,
+           label = "best-scratch-offs.com/il",
+           size = 5,
+           fontface = "bold")+
+  coord_quickmap()+
   theme_bw()+
   theme(panel.grid = element_blank(),
         panel.border = element_blank(),
         line = element_blank(),
         text = element_blank(),
         plot.margin = margin(0,0,0,0))
-NC_logo
+
+IL_logo
 ```
 
 ::: {style="text-align:center"}
@@ -121,7 +122,7 @@ NC_logo
 
 ## `r scales::label_comma()(avg_sold_per_day)`
 
-#### Scratch-Off Tickets are sold Everyday in North Carolina
+#### Scratch-Off Tickets are sold Everyday in Illinois
 
 <br>
 
@@ -129,7 +130,7 @@ NC_logo
 
 #### Prizes greater than \$1,000,000 Available to Win Now
 
-There are millions of dollars to be won in North Carolina scratch-offs! Our experts have analyzed all the scratch off games in North Carolina and using advanced data analytics will help you play the games with the best chance of winning.
+There are millions of dollars to be won in Illinois scratch-offs! Our experts have analyzed all the scratch off games in Illinois and using advanced data analytics will help you play the games with the best chance of winning.
 :::
 
 <br><br>
