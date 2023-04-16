@@ -3,7 +3,7 @@
     "path": "~/Documents/GitHub/best-scratch-offs/il.Rmd",
     "project_path": "il.Rmd",
     "type": "r_markdown",
-    "hash": "287841895",
+    "hash": "4105362383",
     "contents": "",
     "dirty": false,
     "created": 1681612621417.0,
@@ -18,15 +18,15 @@
         "rmdVisualMode": "true",
         "rmdVisualWrapConfigured": "true",
         "docOutlineVisible": "1",
-        "rmdVisualCollapsedChunks": "949",
-        "rmdVisualModeLocation": "3163:1193"
+        "rmdVisualCollapsedChunks": "",
+        "rmdVisualModeLocation": "3262:2239"
     },
     "folds": "",
-    "lastKnownWriteTime": 1681613020,
+    "lastKnownWriteTime": 1681670938,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1681613020436,
+    "last_content_update": 1681670938950,
     "read_only": false,
     "read_only_alternatives": []
 }

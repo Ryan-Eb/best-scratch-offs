@@ -7,6 +7,8 @@ navbar:
       href: index.html
     - text: "States"
       menu:
+        - text: "California"
+          href: ca.html
         - text: "Florida"
           href: fl.html
         - text: "North Carolina"

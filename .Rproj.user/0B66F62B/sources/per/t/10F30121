@@ -3,7 +3,7 @@
     "path": "~/Documents/GitHub/best-scratch-offs/fl.Rmd",
     "project_path": "fl.Rmd",
     "type": "r_markdown",
-    "hash": "2597368767",
+    "hash": "2441713672",
     "contents": "",
     "dirty": false,
     "created": 1681574016556.0,
@@ -16,16 +16,16 @@
         "rmdVisualWrapConfigured": "true",
         "docOutlineVisible": "0",
         "rmdVisualCollapsedChunks": "",
-        "rmdVisualModeLocation": "3575:2440",
+        "rmdVisualModeLocation": "3311:2177",
         "cursorPosition": "158,0",
         "scrollLine": "0"
     },
     "folds": "",
-    "lastKnownWriteTime": 1681612540,
+    "lastKnownWriteTime": 1681670938,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1681612540590,
+    "last_content_update": 1681670938905,
     "read_only": false,
     "read_only_alternatives": []
 }
