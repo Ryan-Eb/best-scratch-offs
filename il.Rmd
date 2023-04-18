@@ -160,7 +160,7 @@ bgt %>%
 
 Pay attention to the "Return on 1\$" column, this is how much money you can expect to win for every dollar you spend on that game. This is based on calculations from the number of prizes remaining and the number of tickets estimated yet to be sold.
 
-Going for the big one? We keep track of all prizes \$5 million or greater yet to be claimed.
+Going for the big one? We keep track of all prizes \$1 million or greater yet to be claimed.
 
 <br>
 
