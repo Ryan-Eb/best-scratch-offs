@@ -191,6 +191,4 @@ df %>%
                                columnDefs = list(list(className = 'dt-center', targets = 0:4))))
 ```
 
-Under Construction
-
 *Disclaimer: The information provided on this website is for educational and entertainment purposes only. We do not guarantee the accuracy or reliability of any information presented. Our recommendations and analysis should not be construed as financial advice, and we are not responsible for any financial losses or damages that may occur. We do not encourage or endorse any form of gambling and recommend that individuals conduct their own research before making any decisions. By using this website, you agree to hold us harmless from any liability arising from your use of the information presented.*

@@ -11,17 +11,21 @@ Our website offers comprehensive data analysis and insights into the odds of win
 
 To get started, select your state from the list below or on the navbar at the top of the page to access state-specific information and odds:
 
+-   [California](https://best-scratch-offs.com/ca.html)
+
+-   [Connecticut](https://best-scratch-offs.com/ct.html)
+
 -   [Florida](https://best-scratch-offs.com/fl.html)
+
+-   [Illinois](https://best-scratch-offs.com/il.html)
+
+-   [Massachusetts](https://best-scratch-offs.com/ma.html)
+
+-   [New York](https://best-scratch-offs.com/ny.html)
 
 -   [North Carolina](https://best-scratch-offs.com/nc.html)
 
 -   [Texas](https://best-scratch-offs.com/tx.html)
-
--   [Illinois](https://best-scratch-offs.com/il.html)
-
--   [California](https://best-scratch-offs.com/ca.html)
-
--   [Connecticut](https://best-scratch-offs.com/ct.html)
 
 We analyze data from current and previous scratch-off games to help you identify the best games to play. Our goal is to provide you with the best possible chances of winning by offering data-driven recommendations.
 

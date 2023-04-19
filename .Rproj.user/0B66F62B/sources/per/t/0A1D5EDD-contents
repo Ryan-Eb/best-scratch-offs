@@ -13,12 +13,17 @@ navbar:
           href: ct.html
         - text: "Florida"
           href: fl.html
+        - text: "Illinois"
+          href: il.html
+        - text: "Massachusetts"
+          href: ma.html
+        - text: "New York"
+          href: ny.html
         - text: "North Carolina"
           href: nc.html
         - text: "Texas"
           href: tx.html
-        - text: "Illinois"
-          href: il.html
+
     - text: "Daily Ticket Spend"
       href: ticket_spend.html
     - text: "About"

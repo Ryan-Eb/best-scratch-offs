@@ -1,0 +1,31 @@
+{
+    "id": "BA150DAE",
+    "path": "~/Documents/GitHub/best-scratch-offs/fl.Rmd",
+    "project_path": "fl.Rmd",
+    "type": "r_markdown",
+    "hash": "1063216568",
+    "contents": "",
+    "dirty": false,
+    "created": 1681784497009.0,
+    "source_on_save": false,
+    "relative_order": 4,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "rmdVisualMode": "true",
+        "rmdVisualWrapConfigured": "true",
+        "docOutlineVisible": "0",
+        "rmdVisualCollapsedChunks": "",
+        "rmdVisualModeLocation": "5518:3187",
+        "cursorPosition": "158,0",
+        "scrollLine": "0"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1681870507,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1681870507348,
+    "read_only": false,
+    "read_only_alternatives": []
+}
