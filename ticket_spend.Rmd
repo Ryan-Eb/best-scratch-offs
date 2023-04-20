@@ -17,7 +17,7 @@ source("/Users/jennaryan/Documents/GitHub/all_lotto_states/all_states_analysis.R
 
 ```
 
-#### Ticket \$ Spend Per Day by State {style="text-align: center"}
+#### Daily Ticket \$ Spend Per Day by State {style="text-align: center"}
 
 ```{r}
 library(plotly)
