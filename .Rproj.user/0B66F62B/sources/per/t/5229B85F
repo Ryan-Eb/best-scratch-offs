@@ -3,7 +3,7 @@
     "path": "~/Documents/GitHub/best-scratch-offs/ticket_spend.Rmd",
     "project_path": "ticket_spend.Rmd",
     "type": "r_markdown",
-    "hash": "0",
+    "hash": "4260322566",
     "contents": "",
     "dirty": false,
     "created": 1682041883135.0,
@@ -13,20 +13,20 @@
         "tempName": "Untitled1",
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "19,0",
+        "cursorPosition": "7,0",
         "scrollLine": "0",
         "rmdVisualMode": "true",
         "rmdVisualWrapConfigured": "true",
         "docOutlineVisible": "1",
         "rmdVisualCollapsedChunks": "",
-        "rmdVisualModeLocation": "399:0"
+        "rmdVisualModeLocation": "100:76.5"
     },
     "folds": "",
-    "lastKnownWriteTime": 1682042309,
+    "lastKnownWriteTime": 1682046453,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1682042309154,
+    "last_content_update": 1682046453196,
     "read_only": false,
     "read_only_alternatives": []
 }
