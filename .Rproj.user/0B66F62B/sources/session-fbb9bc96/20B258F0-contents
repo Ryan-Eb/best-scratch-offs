@@ -17,7 +17,7 @@ source("/Users/jennaryan/Documents/GitHub/all_lotto_states/all_states_analysis.R
 
 ```
 
-#### \$ Amount Spent on Scratch off tickets daily by state {style="text-align: center"}
+#### Daily Ticket \$ Spend Per Day by State {style="text-align: center"}
 
 ```{r eval=FALSE, include=FALSE}
 library(plotly)
@@ -84,7 +84,6 @@ state_highlight <- highlight_key(state_spend,~state,"Select A State")
 
 sp <- state_highlight %>%    
     ggplot(aes(x = scrape_date, y = dollar_spend_per_day))+
-    geom_point()+
     geom_line()+
     theme_bw()+
     scale_y_continuous(labels = scales::label_dollar())+
@@ -93,7 +92,7 @@ sp <- state_highlight %>%
 
 select <- highlight(
   ggplotly(sp, tooltip = "state"), 
-  selectize = TRUE, persistent = FALSE, color = "red", width="100%")
+  selectize = TRUE, persistent = FALSE, color = "darkred", width="100%")
 
 htmltools::div(
   style = "display: flex; flex-direction: row; align-items: center;",
