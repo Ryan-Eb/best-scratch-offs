@@ -82,23 +82,28 @@ state_spend <- df %>%
 
 state_highlight <- highlight_key(state_spend,~state,"Select A State")
 
+spp <- plot_ly(data = state_highlight,
+               x = ~scrape_date,
+               y = ~dollar_spend_per_day,
+               text = ~state) %>% 
+  add_lines(hoverinfo = "text")
+
+select2 <- highlight(
+  spp,
+  on = "plotly_hover",
+  selectize = TRUE, persistent = FALSE, color = "red")
+  
 sp <- state_highlight %>%    
-    ggplot(aes(x = scrape_date, y = dollar_spend_per_day))+
+    ggplot(aes(x = scrape_date, y = dollar_spend_per_day, text = state))+
     geom_point()+
     geom_line()+
     theme_bw()+
     scale_y_continuous(labels = scales::label_dollar())+
     labs(y = "$ Spend per Day",
-         x = "Date")
+         x = "Date") 
 
-select <- highlight(
-  ggplotly(sp, tooltip = "state"), 
-  selectize = TRUE, persistent = FALSE, color = "red", width="100%")
-
-htmltools::div(
-  style = "display: flex; flex-direction: row; align-items: center;",
-  select
-)
+div(style = "text-align: center",
+    select2)
 ```
 
 Hold shift to select multiple states
