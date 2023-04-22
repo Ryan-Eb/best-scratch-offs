@@ -29,17 +29,23 @@ library(maps)
 library(leaflet)
 library(htmlwidgets)
 library(htmltools)
-
+library(maps)
 
 state_convert <- data.frame(abb = state.abb, name = state.name)
 
 state_map_data <- state_spend %>% group_by(state) %>% 
   summarise(avg_daily = mean(dollar_spend_per_day)) %>% 
+  mutate(url = paste0("https://best-scratch-offs.com/",tolower(state))) %>% 
   mutate(state = state_convert$name[which(state_convert$abb %in% state)] %>% tolower())
 
-# Load US state map data
-us_states <- map("state", fill = TRUE, plot = FALSE)
 
+# Load US state map data
+us_states <- maps::map("state", fill = TRUE, plot = FALSE)
+
+url_data <- data.frame(names <- us_states$names) %>% 
+  mutate(state = names %>% str_split(":",simplify = TRUE) %>% .[,1]) %>% 
+  left_join(state_map_data, by = "state") %>% 
+  mutate(url = ifelse(is.na(url),"https://best-scratch-offs.com",url))
 
 # Define the content to be displayed when hovering over a state
 popup_content <- paste0(
@@ -57,16 +63,26 @@ leaflet_map <- leaflet() %>%
                                    .[,1] %in% state_map_data$state, "orange", "white"),
               color = "grey", weight = 1,
               opacity = 1, fillOpacity = .6,
+              stroke = TRUE,
               # Bind the popup to display the state data
-              popup = popup_content,
               layerId = ~us_states$names,
               group = "states") %>%
   # Set the initial view to show the entire US
   setView(lng = -95.7, lat = 37, zoom = 4)
 
+jsCode <- paste0('
+ function(el, x, data) {
+  var marker = document.getElementsByClassName("leaflet-interactive");
+  for(var i=0; i < marker.length; i++){
+    (function(){
+      var v = data.url[i];
+      marker[i].addEventListener("click", function() { window.open(v);}, false);
+  }()); 
+  }
+ }
+')
 
-
-leaflet_map
+  leaflet_map %>% htmlwidgets::onRender(jsCode, data=url_data) 
 
 ```
 
