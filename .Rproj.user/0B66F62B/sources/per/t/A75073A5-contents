@@ -51,7 +51,7 @@ popup_content <- paste0(
 
 # Create a leaflet map
 leaflet_map <- leaflet() %>%
-  addProviderTiles(provider = providers$CartoDB.Positron) %>%
+  addProviderTiles(provider = providers$Stamen.TonerLite) %>%
   addPolygons(data = us_states,
               fillColor = ifelse(us_states$names %>% str_split(":", simplify = TRUE) %>% 
                                    .[,1] %in% state_map_data$state, "orange", "white"),
@@ -62,7 +62,8 @@ leaflet_map <- leaflet() %>%
               layerId = ~us_states$names,
               group = "states") %>%
   # Set the initial view to show the entire US
-  fitBounds(lng1 = -128, lat1 = 23, lng2 = -65, lat2 = 50)
+  setView(lng = -95.7, lat = 37, zoom = 4)
+
 
 
 leaflet_map
@@ -70,7 +71,7 @@ leaflet_map
 ```
 
 |                                                      |                                                        |                                                         |
-|------------------------------------------------------|--------------------------------------------------------|---------------------------------------------------------|
+|-----------------------|------------------------|-------------------------|
 | [California](https://best-scratch-offs.com/ca.html)  | [Illinois](https://best-scratch-offs.com/il.html)      | [North Carolina](https://best-scratch-offs.com/nc.html) |
 | [Connecticut](https://best-scratch-offs.com/ct.html) | [Massachusetts](https://best-scratch-offs.com/ma.html) | [Texas](https://best-scratch-offs.com/tx.html)          |
 | [Florida](https://best-scratch-offs.com/fl.html)     | [New York](https://best-scratch-offs.com/ny.html)      |                                                         |
