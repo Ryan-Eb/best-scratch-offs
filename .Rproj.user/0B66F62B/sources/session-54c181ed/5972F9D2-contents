@@ -61,35 +61,30 @@ library(crosstalk)
 library(htmltools)
 library(htmlwidgets)
 
-state_spend_2 <- state_spend %>% mutate(name_bar = 5)
+state_highlight <- highlight_key(state_spend,~state,"Select A State")
 
-state_highlight <- highlight_key(state_spend_2,~state,"Select A State")
-
-slp <- plot_ly(data = state_highlight,
+spp <- plot_ly(data = state_highlight,
                x = ~scrape_date,
                y = ~dollar_spend_per_day,
-               text = ~state,
-               color = I("black")) %>% 
+               text = ~state) %>% 
   add_lines(hoverinfo = "text")
 
-sbc <- plot_ly(data = state_highlight,
-        y = ~state,
-        x = ~name_bar,
-        text = ~state,
-        textposition = "inside",
-        insidetextanchor = "middle",
-        hoverinfo = "text") %>% 
-  group_by(state) %>% summarise(name_bar = name_bar[1]) %>% 
-  add_bars(x=~name_bar) %>% 
-  layout(yaxis = list(visible = FALSE),
-         xaxis = list(visible = FALSE))
-
-state_plots <- subplot(sbc,slp,widths = c(.1,.9)) %>% highlight(on = "plotly_hover", selectize = FALSE) %>% 
-  layout(barmode = "overlay",
-         showlegend = FALSE)
+select2 <- highlight(
+  spp,
+  on = "plotly_hover",
+  selectize = TRUE, persistent = FALSE, color = "red")
+  
+sp <- state_highlight %>%    
+    ggplot(aes(x = scrape_date, y = dollar_spend_per_day, text = state))+
+    geom_point()+
+    geom_line()+
+    theme_bw()+
+    scale_y_continuous(labels = scales::label_dollar())+
+    labs(y = "$ Spend per Day",
+         x = "Date") 
 
 div(style = "text-align: center",
-    state_plots)
+    select2)
 ```
 
 Hold shift to select multiple states
