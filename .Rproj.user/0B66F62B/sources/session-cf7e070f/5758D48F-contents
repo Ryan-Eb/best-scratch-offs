@@ -68,9 +68,10 @@ state_highlight <- highlight_key(state_spend_2,~state,"Select A State")
 slp <- plot_ly(data = state_highlight,
                x = ~scrape_date,
                y = ~dollar_spend_per_day,
-               text = ~state,
                color = I("black")) %>% 
-  add_lines(hoverinfo = "text")
+  add_markers(hovertext = ~ paste0("State: ", state, "<br>",dollar_spend_per_day %>% scales::label_dollar()(.)),
+            hoverinfo = "text") %>% 
+  add_lines()
 
 sbc <- plot_ly(data = state_highlight,
         y = ~state,

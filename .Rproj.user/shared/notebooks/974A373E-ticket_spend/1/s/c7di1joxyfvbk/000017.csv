@@ -1,0 +1,10 @@
+"0","slp <- plot_ly(data = state_highlight,
+               x = ~scrape_date,
+               y = ~dollar_spend_per_day,
+               color = I(""black"")) %>% 
+  add_markers(hovertext = ~ paste0(""State: "", state, <br>,dollar_spend_per_day),
+"
+"2","Error: unexpected '<' in:
+""               color = I(""black"")) %>% 
+  add_markers(hovertext = ~ paste0(""State: "", state, <""
+"

@@ -1,7 +1,0 @@
-"0","div(style = ""text-align: center"",
-    state_plots)
-"
-"2","Setting the `off` event (i.e., 'plotly_doubleclick') to match the `on` event (i.e., 'plotly_hover'). You can change this default via the `highlight()` function.
-"
-"2","Setting the `off` event (i.e., 'plotly_doubleclick') to match the `on` event (i.e., 'plotly_hover'). You can change this default via the `highlight()` function.
-"

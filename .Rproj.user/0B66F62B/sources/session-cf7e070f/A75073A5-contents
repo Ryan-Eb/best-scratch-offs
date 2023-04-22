@@ -35,17 +35,16 @@ state_convert <- data.frame(abb = state.abb, name = state.name)
 
 state_map_data <- state_spend %>% group_by(state) %>% 
   summarise(avg_daily = mean(dollar_spend_per_day)) %>% 
-  mutate(url = paste0("https://best-scratch-offs.com/",tolower(state))) %>% 
-  mutate(state = state_convert$name[which(state_convert$abb %in% state)] %>% tolower())
-
+  mutate(state_abb = state) %>% 
+  mutate(url = paste0("https://best-scratch-offs.com/",tolower(state_abb))) %>% 
+  mutate(state = state_convert$name[match(state_abb,state_convert$abb)] %>% tolower())
 
 # Load US state map data
 us_states <- maps::map("state", fill = TRUE, plot = FALSE)
 
 url_data <- data.frame(names <- us_states$names) %>% 
   mutate(state = names %>% str_split(":",simplify = TRUE) %>% .[,1]) %>% 
-  left_join(state_map_data, by = "state") %>% 
-  mutate(url = ifelse(is.na(url),"https://best-scratch-offs.com",url))
+  left_join(state_map_data, by = "state")
 
 # Define the content to be displayed when hovering over a state
 popup_content <- paste0(
@@ -76,11 +75,14 @@ jsCode <- paste0('
   for(var i=0; i < marker.length; i++){
     (function(){
       var v = data.url[i];
-      marker[i].addEventListener("click", function() { window.open(v);}, false);
+      if(v !== null && v !== undefined) {
+        marker[i].addEventListener("click", function() { window.open(v);}, false);
+      }
   }()); 
   }
  }
 ')
+
 
   leaflet_map %>% htmlwidgets::onRender(jsCode, data=url_data) 
 
