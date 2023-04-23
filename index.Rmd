@@ -91,7 +91,7 @@ jsCode <- paste0('
 ```
 
 |                                                      |                                                        |                                                         |
-|-----------------------|------------------------|-------------------------|
+|------------------------------------------------------|--------------------------------------------------------|---------------------------------------------------------|
 | [California](https://best-scratch-offs.com/ca.html)  | [Illinois](https://best-scratch-offs.com/il.html)      | [North Carolina](https://best-scratch-offs.com/nc.html) |
 | [Connecticut](https://best-scratch-offs.com/ct.html) | [Massachusetts](https://best-scratch-offs.com/ma.html) | [Texas](https://best-scratch-offs.com/tx.html)          |
 | [Florida](https://best-scratch-offs.com/fl.html)     | [New York](https://best-scratch-offs.com/ny.html)      |                                                         |
