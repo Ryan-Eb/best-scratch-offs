@@ -3,16 +3,10 @@ title: "Best-Scratch-Offs.com"
 output: 
   html_document:
     theme: yeti
+    includes:
+      in_header: ga_script.html
 ---
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-JNM7KF5NN7"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
 
-  gtag('config', 'G-JNM7KF5NN7');
-</script>
 Welcome to Best-Scratch-Offs.com, your go to resource for improving your chances of winning scratch-off games!
 
 Our website offers comprehensive data analysis and insights into the odds of winning various scratch-off games offered by state lotteries. We strive to provide our users with the most accurate and up-to-date information to help them make informed decisions before purchasing their tickets.
