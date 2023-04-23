@@ -1,12 +1,12 @@
 {
-    "id": "A48445A8",
+    "id": "AEBC525C",
     "path": "~/Documents/GitHub/best-scratch-offs/index.Rmd",
     "project_path": "index.Rmd",
     "type": "r_markdown",
-    "hash": "781528422",
+    "hash": "0",
     "contents": "",
     "dirty": false,
-    "created": 1682201718134.0,
+    "created": 1682213253923.0,
     "source_on_save": false,
     "relative_order": 2,
     "properties": {
@@ -16,16 +16,16 @@
         "rmdVisualWrapConfigured": "true",
         "docOutlineVisible": "0",
         "rmdVisualCollapsedChunks": "",
-        "cursorPosition": "25,0",
+        "cursorPosition": "27,0",
         "scrollLine": "0",
-        "rmdVisualModeLocation": "2:0"
+        "rmdVisualModeLocation": "3653:1721"
     },
     "folds": "",
-    "lastKnownWriteTime": 1682212716,
+    "lastKnownWriteTime": 1682214411,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1682212716114,
+    "last_content_update": 1682214411776,
     "read_only": false,
     "read_only_alternatives": []
 }
