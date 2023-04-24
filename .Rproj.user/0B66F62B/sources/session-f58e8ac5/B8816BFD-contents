@@ -1,0 +1,826 @@
+library(tidyverse)
+library(lubridate)
+library(rvest)
+library(jsonlite)
+library(httr)
+
+# FLORIDA ######
+
+fl_start <- Sys.time()
+
+fl_url1 <- "https://www.flalottery.com/remainingPrizes"
+
+fl_game_links <- paste0("https://www.flalottery.com/",read_html(fl_url1) %>% html_nodes("a") %>% html_attr("href") %>% 
+                          str_subset("gameNumber") %>% unique())
+
+fl_ticket_price <- read_html(fl_url1) %>% html_nodes("table") %>% html_table() %>% .[[1]] %>% select(1,5) %>% distinct(.keep_all=TRUE)
+
+game_links_df <- bind_cols(fl_ticket_price,fl_game_links) %>% 
+  rename(link = `...3`)
+
+fl_game_data <- data.frame()
+
+for(i in 1:nrow(game_links_df)){
+  
+temp_url <- game_links_df$link[i]
+
+  x <- read_html(temp_url) %>% html_nodes("table") %>% html_table() %>% .[[1]] %>% 
+      mutate(prize_amount = as.numeric(str_replace_all(`Prize Amount`,"[$,]",""))) %>% 
+      mutate(total_prizes = as.numeric(str_replace_all(`Total Prizes`, ",",""))) %>% 
+      mutate(prizes_remaining = as.numeric(str_replace_all(`Prizes Remaining`,",",""))) %>% 
+      mutate(prizes_claimed = as.numeric(str_replace_all(`Prizes Paid`,",",""))) %>% 
+      select(-c(1:5)) %>% 
+      mutate(overall_odds = as.numeric(read_html(temp_url) %>% html_nodes(".scratchOdds+ p") 
+                                       %>% html_text2() %>% str_split("in-",simplify = TRUE) %>% .[,2])) %>% 
+      mutate(game_number = game_links_df$`Game Number`[i]) %>% 
+      mutate(ticket_price = as.numeric(str_replace_all(game_links_df$`Ticket Cost`[i],"[$]",""))) %>% 
+      relocate(game_number:ticket_price, .before = prize_amount) %>% 
+      mutate(state = "FL") %>% 
+      mutate(scrape_date = today()) %>% 
+      relocate(state:scrape_date,.before = prize_amount)
+
+fl_game_data <- bind_rows(fl_game_data, x)
+
+print(paste0(i," of ", nrow(game_links_df)))
+      
+}
+
+fl_end <- Sys.time()
+fl_time <- c("FL",as.numeric(difftime(fl_end,fl_start,units = "mins")))
+
+time_to_run <- data.frame(state = fl_time[1], time = fl_time[2])
+
+# NORTH CAROLINA ###########
+nc_start <- Sys.time()
+nc_url1 <- "https://nclottery.com/scratch-off"
+
+nc_game_links <- paste0("https://nclottery.com",read_html(nc_url1) %>% html_nodes("a") %>% html_attr("href") %>% str_subset("scratch-off/"))
+
+nc_game_data <- data.frame()
+
+for (i in 1:length(nc_game_links)) {
+  
+temp_url <- nc_game_links[i]
+
+x <- read_html(temp_url) %>% html_nodes("table") %>% html_table () %>% .[[2]] %>% .[-1,] %>% 
+  mutate(ticket_price = read_html(temp_url) %>% html_nodes("table") %>% html_table () %>% .[[1]] %>% .[2,2] %>% 
+           str_replace_all("[$]","") %>% as.numeric()) %>% 
+  mutate(game_number = read_html(temp_url) %>% html_nodes("table") %>% html_table () %>% .[[1]] %>% .[6,2] %>% 
+           as.numeric()) %>% 
+  mutate(overall_odds = read_html(temp_url) %>% html_nodes("table") %>% html_table () %>% .[[1]] %>% .[4,2] %>% 
+           str_split("in ",simplify = TRUE) %>% .[2] %>% as.numeric()) %>% 
+  mutate(state = "NC") %>% 
+  mutate(scrape_date = today()) %>% 
+  mutate(prize_amount = str_replace_all(Value,"[$,]","") %>% as.numeric()) %>% 
+  mutate(total_prizes = str_replace_all(.[[3]],",","") %>% as.numeric()) %>% 
+  mutate(prizes_remaining =  str_replace_all(Remaining,",","") %>% as.numeric()) %>% 
+  mutate(prizes_claimed = total_prizes - prizes_remaining) %>% 
+  select(-c(1:4)) %>% 
+  relocate(game_number,.before = ticket_price) %>% 
+  relocate(state:scrape_date,.after = ticket_price) %>% 
+  relocate(overall_odds, .after = prizes_claimed)
+
+nc_game_data <- bind_rows(nc_game_data, x)
+
+print(paste0(i," of ", length(nc_game_links)))
+}
+nc_end <- Sys.time()
+nc_time <- c("NC",as.numeric(difftime(nc_end,nc_start,units = "mins")))
+
+time_to_run <- bind_rows(time_to_run,data.frame(state = nc_time[1], time = nc_time[2]))
+
+# TEXAS ########
+
+tx_start <- Sys.time()
+tx_url1 <- "https://www.texaslottery.com/export/sites/lottery/Games/Scratch_Offs/all.html"
+
+tx_game_links <- paste0("https://www.texaslottery.com",read_html(tx_url1) %>% html_nodes("a") %>% html_attr("href") %>% str_subset("details"))
+
+tx_ticket_price <- read_html(tx_url1) %>% html_nodes("table") %>% html_table() %>% .[[1]] %>% drop_na() %>% 
+  select(1,3) %>% 
+  mutate(ticket_price = str_replace_all(`Ticket Price`,"[$]","") %>% as.numeric()) %>% 
+  rename(game_number = `Game Number`) %>% 
+  select(-2)
+
+tx_game_data <- data.frame()
+for(i in 1:length(tx_game_links)){
+  
+temp_url <- tx_game_links[i]
+
+x <-read_html(temp_url) %>% html_nodes("table") %>% html_table() %>% .[[1]] %>% 
+  mutate(game_number = read_html(temp_url) %>% html_nodes("h2") %>% html_text2() %>% str_split("No. ",simplify = TRUE) %>% .[2] %>% 
+                       str_split(" -", simplify = TRUE) %>% .[1] %>% as.numeric()) %>% 
+  mutate(overall_odds = read_html(temp_url) %>% html_nodes("p:nth-child(9)") %>% html_text2() %>% str_split(" in ",simplify = TRUE) %>% 
+                        .[1,3] %>% str_split("[*]",simplify = TRUE ) %>% .[1,1] %>% as.numeric()) %>% 
+  mutate(prize_amount = str_replace_all(.[[1]],"[$,]","") %>% as.numeric()) %>% 
+  mutate(total_prizes = str_replace_all(.[[2]],"[,]","") %>% as.numeric()) %>% 
+  mutate(prizes_claimed = str_replace_all(.[[3]],"[,]","") %>% as.numeric()) %>% 
+  mutate(prizes_remaining = total_prizes - prizes_claimed) %>% 
+  mutate(state = "TX") %>% 
+  mutate(scrape_date = today()) %>% 
+  select(-c(1:3)) %>% 
+  left_join(tx_ticket_price, by = "game_number") %>% 
+  relocate(ticket_price, .after = game_number) %>% 
+  relocate(state:scrape_date, .after = ticket_price) %>% 
+  relocate(prizes_remaining, .before = prizes_claimed) %>% 
+  relocate(overall_odds, .after = prizes_claimed)
+  
+tx_game_data <- bind_rows(tx_game_data,x)
+
+print(paste0(i," of ", length(tx_game_links)))
+}
+
+tx_end <- Sys.time()
+tx_time <- c("TX",as.numeric(difftime(tx_end,tx_start,units = "mins")))
+time_to_run <- bind_rows(time_to_run,data.frame(state = tx_time[1], time = tx_time[2]))
+
+# ILLINOIS ########
+il_start <- Sys.time()
+
+il_url1 <- "https://www.illinoislottery.com/games-hub/instant-tickets"
+il_url2 <- "https://www.illinoislottery.com/games-hub/instant-tickets?page=1"
+il_url3 <- "https://www.illinoislottery.com/games-hub/instant-tickets?page=2"
+il_url4 <- "https://www.illinoislottery.com/about-the-games/unpaid-instant-games-prizes"
+
+il_game_links <- c(
+    paste0("https://www.illinoislottery.com",read_html(il_url1) %>% html_nodes("a") %>% 
+             html_attr("href") %>% str_subset("instant-tickets/")),
+    
+    paste0("https://www.illinoislottery.com",read_html(il_url2) %>% html_nodes("a") %>% 
+             html_attr("href") %>% str_subset("instant-tickets/")),
+    
+    paste0("https://www.illinoislottery.com",read_html(il_url3) %>% html_nodes("a") %>% 
+             html_attr("href") %>% str_subset("instant-tickets/"))) %>% 
+    unique()
+
+odds_df <- data.frame()
+
+for (i in 1:length(il_game_links)) {
+  
+temp_url <- il_game_links[i]
+
+overall_odds <- read_html(temp_url) %>% html_nodes("table") %>% html_table() %>% .[[1]] %>% .[2,2] %>% str_extract("\\d+\\.+\\d*")
+
+game_number <- read_html(temp_url) %>% html_nodes("table") %>% html_table() %>% .[[1]] %>% .[6,2] %>% as.numeric()
+
+x <- data.frame(game_number,overall_odds)
+
+odds_df <- bind_rows(odds_df,x)
+
+print(paste0(i," of ", length(il_game_links)))
+}
+
+il_game_data <- read_html(il_url4) %>% html_nodes(".unclaimed-prizes-table__cell") %>% html_text2() %>% 
+  matrix(ncol = 6, byrow = TRUE) %>% 
+  data.frame() %>% 
+  separate_longer_delim(c(X4,X5,X6),"\n") %>% 
+  mutate(game_number = str_split(.[[3]],"\n",simplify = TRUE) %>% .[,1] %>% as.numeric()) %>% 
+  mutate(ticket_price = str_replace_all(.[[2]],"[$]","") %>% as.numeric()) %>% 
+  mutate(state = "IL") %>% 
+  mutate(scrape_date = today()) %>% 
+  mutate(prize_amount = str_replace_all(.[[4]],"[$,]","") %>% as.numeric()) %>% 
+  mutate(total_prizes = str_replace_all(.[[5]],"[,]","") %>% as.numeric()) %>% 
+  mutate(prizes_remaining = str_replace_all(.[[6]],"[,]","") %>% as.numeric()) %>% 
+  mutate(prizes_claimed = total_prizes - prizes_remaining) %>% 
+  left_join(odds_df, by = "game_number") %>% 
+  mutate(overall_odds = as.numeric(overall_odds)) %>% 
+  select(-c(1:6))
+  
+il_end <- Sys.time()
+il_time <- c("IL",as.numeric(difftime(il_end,il_start,units = "mins")))
+
+time_to_run <- bind_rows(time_to_run,data.frame(state = il_time[1], time = il_time[2]))
+
+# CONNECTICUT ##########
+ct_start <- Sys.time()
+ct_url1 <- "https://www.ctlottery.org/ScratchGamesTable"
+
+ct_game_links <- paste0("https://www.ctlottery.org",read_html(ct_url1) %>% html_nodes("a") %>% html_attr("href") %>% 
+                           str_subset("Games/\\d+\\d+\\d+\\d*") %>% unique())
+
+ct_game_data <- data.frame()
+for (i in 1:length(ct_game_links)) {
+  
+temp_url <- ct_game_links[i]
+
+x <- read_html(temp_url) %>% html_nodes("table") %>% html_table() %>% .[[2]] %>% 
+  mutate(game_number = str_extract(temp_url,"\\d+\\d+\\d+\\d") %>% as.numeric()) %>% 
+  mutate(ticket_price = read_html(temp_url) %>% html_nodes("table") %>% html_table() %>% .[[1]] %>% .[2,2] %>% 
+        str_replace_all("[$]","") %>% as.numeric()) %>% 
+  mutate(state = "CT") %>% 
+  mutate(scrape_date = today()) %>% 
+  mutate(prize_amount = str_replace_all(.[[1]],"[$,]","") %>% as.numeric()) %>% 
+  mutate(total_prizes = str_replace_all(.[[2]],"[,]","") %>% as.numeric()) %>% 
+  mutate(prizes_remaining = str_replace_all(.[[3]],"[,]","") %>% as.numeric()) %>% 
+  mutate(prizes_claimed = total_prizes - prizes_remaining) %>% 
+  mutate(overall_odds = read_html(temp_url) %>% html_nodes("table") %>% html_table() %>% .[[1]] %>% .[7,2] %>% 
+           str_extract("\\d+\\.+\\d*") %>% as.numeric()) %>% 
+  select(-c(1:3))
+
+ct_game_data <- bind_rows(ct_game_data,x)
+
+print(paste0(i," of ", length(ct_game_links)))
+}
+
+ct_end <- Sys.time()
+ct_time <- c("CT",as.numeric(difftime(ct_end,ct_start,units = "mins")))
+time_to_run <- bind_rows(time_to_run,data.frame(state = ct_time[1], time = ct_time[2]))
+
+# NEW YORK #######
+
+ny_start <- Sys.time()
+
+ny_json <- "https://data.ny.gov/resource/nzqa-7unk.json"
+
+ny_data <- fromJSON(ny_json)
+
+odds_data <- fromJSON("https://nylottery.ny.gov/drupal-api/api/v2/scratch_off_data?_format=json")
+
+odds_data <- data.frame(game_number = odds_data$rows$game_number,overall_odds= odds_data$rows$overall_odds,
+                        ticket_price = odds_data$rows$ticket_price) %>% 
+  mutate(overall_odds = str_extract(overall_odds,"\\d+\\.+\\d*")) 
+
+ny_game_data <- left_join(ny_data,odds_data, by = "game_number") %>% 
+  mutate(state = "NY") %>% 
+  mutate(scrape_date = today()) %>% 
+  mutate(prize_amount = str_replace_all(prize_amount,"[$,]","") %>% as.numeric()) %>% 
+  mutate(total_prizes = total %>% as.numeric()) %>% 
+  mutate(prizes_remaining = unpaid %>% as.numeric()) %>% 
+  mutate(prizes_claimed = paid %>% as.numeric) %>% 
+  relocate(overall_odds, .after = prizes_claimed) %>% 
+  select(-c(2:5)) %>% 
+  mutate(game_number = as.numeric(game_number)) %>% 
+  mutate(ticket_price = as.numeric(ticket_price)) %>% 
+  mutate(overall_odds = as.numeric(overall_odds)) %>% 
+  relocate(prize_amount, .after = scrape_date)
+
+ny_end <- Sys.time()
+ny_time <- c("NY",as.numeric(difftime(ny_end,ny_start,units = "mins")))
+time_to_run <- bind_rows(time_to_run,data.frame(state = ny_time[1], time = ny_time[2]))
+
+# CALIFORNIA ####
+
+ca_start <- Sys.time()
+
+ca_url1 <- "https://www.calottery.com/api/games/scratchers"
+
+response <- GET(ca_url1)
+data <- fromJSON(rawToChar(response$content))
+game <- data$games
+
+ca_game_data <- game %>% unnest(prizeTiers) %>% 
+  filter(state == "Active") %>% 
+  select(7,14,19,21,22,23,34) %>% 
+  rename(game_number = gameNumber,
+         ticket_price = price,
+         prize_amount = value,
+         total_prizes = totalNumberOfPrizes,
+         prizes_claimed = numberOfPrizesCashed,
+         prizes_remaining = numberOfPrizesPending,
+         overall_odds = winningOddsText) %>% 
+  mutate(state = "CA") %>% 
+  mutate(scrape_date = today()) %>% 
+  mutate(overall_odds = overall_odds %>% as.numeric()) %>% 
+  relocate(state:scrape_date, .after = ticket_price) %>% 
+  relocate(prizes_remaining, .before = prizes_claimed)
+
+ca_end <- Sys.time()
+ca_time <- c("CA",as.numeric(difftime(ca_end,ca_start,units = "mins")))
+time_to_run <- bind_rows(time_to_run,data.frame(state = ca_time[1], time = ca_time[2]))
+
+# MASSACHUSETTS ####
+
+ma_start <- Sys.time()
+
+ma_url1 <- "https://www.masslottery.com/api/v1/instant-game-prizes"
+ma_url2 <- "https://www.masslottery.com/api/v1/games"
+
+ma_odds_data <- fromJSON(ma_url2) %>% 
+  select(id, odds) %>% 
+  drop_na() %>% 
+  rename(game_number = id,
+         overall_odds = odds) %>% 
+  mutate(overall_odds = str_extract_all(overall_odds,"\\d+\\.+\\d*") %>% as.numeric()) %>% 
+  distinct()
+
+ma_game_data <- fromJSON(ma_url1) %>% unnest(cols = c(prizeTiers)) %>% 
+  mutate(game_number = massGameID %>% as.numeric()) %>% 
+  mutate(ticket_price = ticketCost %>% as.numeric()) %>% 
+  mutate(state = "MA") %>% 
+  mutate(scrape_date = today()) %>% 
+  mutate(prize_amount = prizeAmount %>% as.numeric()) %>% 
+  mutate(total_prizes = totalPrizes %>% as.numeric()) %>% 
+  mutate(prizes_remaining = prizesRemaining %>% as.numeric()) %>% 
+  mutate(prizes_claimed = paidPrizes %>% as.numeric()) %>% 
+  left_join(ma_odds_data, by = "game_number") %>% 
+  select(13:21) %>% 
+  drop_na()
+
+ma_end <- Sys.time()
+ma_time <- c("MA",as.numeric(difftime(ma_end,ma_start,units = "mins")))
+time_to_run <- bind_rows(time_to_run,data.frame(state = ma_time[1], time = ma_time[2]))
+
+
+
+# LOUISIANA ####
+
+la_start <- Sys.time()
+
+la_url1 <- "https://louisianalottery.com/scratch-offs/top-prizes-remaining"
+
+la_game_links <- paste0("https:",read_html(la_url1) %>% html_nodes(".text-left a") %>% html_attr("href"))
+
+la_game_data <- data.frame()
+for(i in 1:length(la_game_links)){
+  
+  temp_url <- la_game_links[i]
+  
+  x <- read_html(temp_url) %>% html_nodes("table") %>% html_table() %>% .[[length(.)]] %>% 
+    rename(prize_amount = X1,
+           total_prizes = X3,
+           prizes_claimed = X4,
+           prizes_remaining = X5) %>% 
+    select(-2) %>% 
+    .[-1,] %>% 
+    mutate(ticket_price = read_html(temp_url) %>% html_nodes("table") %>% html_table() %>% .[[1]] %>% .[1,2] %>% 
+             str_replace_all("[$]","") %>% as.numeric()) %>% 
+    mutate(overall_odds = read_html(temp_url) %>% html_nodes("table") %>% html_table() %>% .[[1]] %>% .[3,2] %>% 
+             str_extract("\\d+\\.+\\d*") %>% as.numeric()) %>% 
+    mutate(game_number = read_html(temp_url) %>% html_nodes(".scratch-off-number") %>% html_text2() %>% 
+             str_extract("\\d+\\d*") %>% as.numeric()) %>% 
+    mutate(state = "LA") %>% 
+    mutate(scrape_date = today()) %>% 
+    select(game_number,ticket_price,state,scrape_date,prize_amount,total_prizes,prizes_remaining,prizes_claimed,overall_odds) %>% 
+    mutate(prize_amount = str_replace_all(prize_amount,"TICKET",as.character(ticket_price)) %>% 
+             str_replace_all("[$,]","") %>% as.numeric()) %>% 
+    mutate(total_prizes = str_replace_all(total_prizes,",","") %>% as.numeric()) %>% 
+    mutate(prizes_claimed = str_replace(prizes_claimed,",","") %>% as.numeric()) %>% 
+    mutate(prizes_remaining = str_replace_all(prizes_remaining,",","") %>% as.numeric())
+  
+  la_game_data <- bind_rows(la_game_data,x)
+  
+  print(paste0(i," of ", length(la_game_links)))
+}
+
+la_end <- Sys.time()
+la_time <- c("LA",as.numeric(difftime(la_end,la_start,units = "mins")))
+time_to_run <- bind_rows(time_to_run,data.frame(state = la_time[1], time = la_time[2]))
+
+# ARKANSAS ####
+ar_start <- Sys.time()
+
+ar_url1 <- "https://www.myarkansaslottery.com/games/instant"
+
+# Create an empty list to store the URLs
+ar_urls <- list(ar_url1)
+
+# Set a flag variable to keep track of errors
+has_error <- FALSE
+
+# Loop until there is an error
+while (!has_error) {
+  
+  # Create a session and follow the link
+  s <- session(ar_url1)
+  
+  # Try to follow the "next" link and catch any errors
+  tryCatch({
+    s <- s %>% session_follow_link("next")
+    
+    # Extract the URL from the response object
+    url <- s$response$url
+    
+    # Add the URL to the list
+    ar_urls[[length(ar_urls)+1]] <- url
+    
+    # Update the URL to follow the next link
+    ar_url1 <- s$response$url
+    
+    # Wait for a few seconds to avoid overwhelming the server
+    Sys.sleep(3)
+    
+  }, error = function(e) {
+    # Set the flag variable to indicate an error occurred
+    has_error <<- TRUE
+  })
+  
+}
+
+# Define a function to extract links from a URL
+extract_links <- function(url) {
+  # Read the HTML content from the URL
+  html <- url %>% read_html()
+  
+  # Extract the links using the appropriate selector
+  links <- html %>% html_nodes(".field-type-text a") %>% html_attr("href")
+  
+  # Return the links
+  return(links)
+}
+
+# Apply the extract_links function to each URL in the list
+links_list <- lapply(ar_urls, extract_links)
+
+ar_game_links <- paste0("https://www.myarkansaslottery.com/",links_list %>% unlist())
+
+ar_game_data <- data.frame()
+for (i in 1:length(ar_game_links)){
+  
+  temp_url <- ar_game_links[i]
+  
+  x <-read_html(temp_url) %>% html_nodes("table") %>% html_table() %>% .[[1]] %>% 
+    mutate(prize_amount = str_replace_all(.[[1]],"[$,]","") %>% as.numeric()) %>% 
+    mutate(total_prizes = str_replace_all(.[[2]],"[,]","") %>% as.numeric()) %>% 
+    mutate(prizes_remaining = str_replace_all(.[[3]],"[,]","") %>% as.numeric()) %>% 
+    mutate(prizes_claimed = total_prizes - prizes_remaining) %>% 
+    mutate(overall_odds = read_html(temp_url) %>% html_nodes(".field-name-field-game-odds .even") %>% 
+             html_text2() %>% str_extract("\\d+\\.+\\d*") %>% as.numeric()) %>% 
+    mutate(game_number = read_html(temp_url) %>% html_nodes("strong") %>% html_text2() %>% as.numeric()) %>%
+    mutate(ticket_price = read_html(temp_url) %>% html_nodes(".field-name-field-ticket-price .even") %>% 
+             html_text2() %>% str_replace_all("[$,]","") %>% as.numeric()) %>% 
+    mutate(state = "AR") %>% 
+    mutate(scrape_date = today()) %>% 
+    select(-c(1:5)) %>% 
+    relocate(game_number:scrape_date, .before = prize_amount)
+  
+  ar_game_data <- bind_rows(ar_game_data,x)
+  
+  print(paste0(i," of ",length(ar_game_links)))
+  
+}
+
+ar_end <- Sys.time()
+ar_time <- c("AR",as.numeric(difftime(ar_end,ar_start,units = "mins")))
+time_to_run <- bind_rows(time_to_run,data.frame(state = ar_time[1], time = ar_time[2]))
+
+# KANSAS ####
+ks_start <- Sys.time()
+
+ks_url1 <- "https://www.kslottery.com/games/instantgameslist"
+
+ks_game_numbers <- ks_url1 %>% read_html() %>% html_nodes("table") %>% html_table() %>% .[[2]] %>% 
+  filter(X4 == "S") %>% select(1:3) %>% 
+  rename(ticket_price = X1,
+         game_number = X2,
+         game_name = X3) %>% 
+  mutate(ticket_price = str_replace_all(ticket_price,"[$,]","") %>% as.numeric())
+
+ks_game_links <- paste0("https://www.kslottery.com",ks_url1 %>% read_html() %>% html_nodes("a") %>% html_attr("href") %>% str_subset("instants") %>% 
+                          .[str_detect(.,paste0(ks_game_numbers$game_number, collapse = "|"))])
+
+ks_game_data <- data.frame()
+for (i in 1:length(ks_game_links)) {
+  
+  temp_url <- ks_game_links[i]
+  
+  x <- temp_url %>% read_html() %>% html_nodes("table") %>% html_table() %>% .[[2]] %>% 
+    filter(!str_detect(.[[1]], "odds")) %>% 
+    mutate(game_number = str_extract(temp_url,"\\d+") %>% as.numeric()) %>% 
+    mutate(ticket_price = ks_game_numbers$ticket_price[which(ks_game_numbers$game_number %in% game_number)]) %>% 
+    mutate(state = "KS") %>% 
+    mutate(scrape_date = today()) %>% 
+    mutate(Prize = str_replace_all(.[[1]],"(?i).*Free.*",as.character(ticket_price))) %>% 
+    mutate(prize_amount = str_replace_all(.[[1]],"[$,]","") %>% as.numeric()) %>% 
+    mutate(total_prizes = NA) %>% 
+    mutate(prizes_remaining = str_replace_all(.[[2]],"[,]","") %>% as.numeric()) %>% 
+    mutate(prizes_claimed = NA) %>% 
+    mutate(overall_odds = temp_url %>% read_html() %>% html_nodes("table") %>% html_table() %>% .[[2]] %>% .[1] %>% 
+             filter(str_detect(Prize,"odds")) %>% str_extract_all("\\d+\\.+\\d*") %>% as.numeric()) %>% 
+    select(-c(1,2))
+  
+  ks_game_data <- bind_rows(ks_game_data, x)
+  
+}
+
+ks_end <- Sys.time()
+
+ks_time <- c("KS",as.numeric(difftime(ks_end,ks_start,units = "mins")))
+time_to_run <- bind_rows(time_to_run,data.frame(state = ks_time[1], time = ks_time[2]))
+
+# KENTUCKY ####
+ky_start <- Sys.time()
+
+ky_url1 <- "https://www.kylottery.com/apps/scratch_offs/available_games.html"
+
+ky_prize_tables <- ky_url1 %>%  read_html() %>% html_nodes("table") %>% html_table() 
+
+ky_game_numbers <- ky_url1 %>% read_html() %>% html_nodes("b:nth-child(21)") %>% html_text2() %>% 
+  as.numeric()
+
+ky_game_odds <- ky_url1 %>% read_html() %>% html_nodes("b:nth-child(18)") %>% html_text2() %>% 
+  str_split(":",simplify = TRUE) %>% .[,2] %>% as.numeric()
+
+ky_game_ticket_price <- ky_url1 %>% read_html() %>% html_nodes("b:nth-child(12)") %>% html_text2() %>%
+  str_replace_all("[$,]","") %>% as.numeric()
+
+ky_game_data <- data.frame()
+
+for (i in 1:length(ky_prize_tables)) {
+  
+  gi <- i
+  
+  x <- ky_prize_tables[[gi]] %>% 
+    mutate(game_number = ky_game_numbers[gi]) %>% 
+    mutate(ticket_price = ky_game_ticket_price[gi]) %>% 
+    mutate(state = "KY") %>% 
+    mutate(scrape_date = today()) %>% 
+    mutate(prize_amount = str_replace_all(.[[1]],"[$,]","") %>% as.numeric()) %>% 
+    mutate(total_prizes = NA) %>% 
+    mutate(prizes_remaining = str_replace_all(.[[2]],"[$,]","") %>% as.numeric()) %>% 
+    mutate(prizes_claimed = NA) %>% 
+    mutate(overall_odds = ky_game_odds[gi]) %>% 
+    select(-c(1,2))
+  
+  ky_game_data <- bind_rows(ky_game_data, x)
+  print(paste0(i," of ",length(ky_prize_tables)))
+}
+
+ky_end <- Sys.time()
+
+ky_time <- c("KY",as.numeric(difftime(ky_end,ky_start,units = "mins")))
+
+time_to_run <- bind_rows(time_to_run,data.frame(state = ky_time[1], time = ky_time[2]))
+
+# MICHIGAN ####
+
+mi_start <- Sys.time()
+
+api_url <- "https://www.michiganlottery.com/api"
+
+headers <- c(
+  'Accept' = 'application/json',
+  'Content-Type' = 'application/json',
+  'User-Agent' = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36',
+  'cms-type' = 'production'
+)
+
+
+
+payload_data_list <- list(
+  operation = NULL,
+  query = "{\n    getRetailTopPrizesRemainingByGameType(gameType: \"INSTANT\"){\n      cms_game_igt_id\n      game_name\n      prizesRemainingData {\n        prize_level\n        prize_amount\n        prizes_remaining\n        starting_amount\n      }\n    }\n  }",
+  variables = NULL
+)
+
+payload_data <- toJSON(payload_data_list, auto_unbox = TRUE)
+
+response <- POST(url = api_url, body = payload_data, add_headers(headers))
+
+if (response$status_code != 200) {
+  cat("Error in request:", response$status_code, "\n")
+} else {
+  cat("Request successful!\n")
+}
+
+json_data <- content(response, as = "text")
+data <- fromJSON(json_data)
+
+payload_data_list2 <- list(
+  operation = NULL,
+  query= "{\n      getCMSGames(removeHiddenGames: false)\n      {\n        name\n        identifier\n        dateAdded\n        logoUrl\n        neoGamesId\n        igtId\n        jackpot\n        gameCategoryIdentifier\n        canPlayOnline\n        canBuyInStore\n        isInstantGame\n        fastCashJackpotPayoutCopy\n        hasSecondChance\n        nameAliases\n        raffleData {\n          raffleName\n          raffleDrawDate\n          raffleDrawNumber\n          raffleDrawNumbers\n          maximumTicketNumber\n        }\n        isKeno\n        isMultiTicket\n        isFeatured\n        ribbon\n        themes {\n          identifier\n        }\n        playStyles {\n          identifier\n        }\n        ticketPrices {\n          priceRange\n          identifier\n        }\n        displayedTicketPrice\n        topPrizes {\n          prizeRange\n          identifier\n        }\n        limitedAvailability\n        webBanners {\n          largeImage {\n            url\n            description\n          }\n          smallImage {\n            url\n            description\n          }\n          action {\n            ... on ExternalLinkBannerAction {\n              url\n            }\n            ... on InternalLinkBannerAction {\n              url\n            }\n            ... on OpenGameBannerAction {\n              neoGamesId\n            }\n            ... on OpenWidgetBannerAction {\n              widget\n            }\n          }\n        }\n        displayedTopPrize\n        overallOdds\n        gamesLobbyOrder\n        onlineRaffleStatus\n        hideFromLobby\n      }\n      getCMSGameTopPrizes\n      {\n        prizeRange\n        identifier\n      }\n      getCMSGameTicketPrices\n      {\n        priceRange\n        identifier\n      }\n      getCMSGameThemes\n      {\n        name\n        identifier\n      }\n      getCMSGamePlayStyles\n      {\n        name\n        identifier\n      }\n      getCMSGameCategories\n      {\n        name,\n        identifier,\n        logoUrl,\n        winUpTo,\n        webBanners {\n          largeImage {\n            url\n            description\n          }\n          smallImage {\n            url\n            description\n          }\n          action {\n            ... on ExternalLinkBannerAction {\n              url\n            }\n            ... on InternalLinkBannerAction {\n              url\n            }\n            ... on OpenGameBannerAction {\n              neoGamesId\n            }\n            ... on OpenWidgetBannerAction {\n              widget\n            }\n          }\n        },\n        nameAliases\n      }\n      getRetailerTypes {\n        id\n        name\n        description\n      }\n    }",
+  variables = NULL
+)
+
+payload_data2 <- toJSON(payload_data_list2, auto_unbox = TRUE)
+
+response2 <- POST(url = api_url, body = payload_data2, add_headers(headers))
+
+if (response$status_code != 200) {
+  cat("Error in request:", response$status_code, "\n")
+} else {
+  cat("Request successful!\n")
+}
+
+json_data2 <- content(response2, as = "text")
+data2 <- fromJSON(json_data2)
+
+odds_list <- data2$data$getCMSGames %>% select(igtId, overallOdds) %>% 
+  drop_na() %>% 
+  mutate(game_number = igtId) %>% 
+  mutate(overall_odds = str_extract(overallOdds,"\\d+\\.+\\d*") %>% as.numeric()) %>%
+  select(game_number,overall_odds)
+
+
+
+#a few games appear to have duplicated prize remaining data
+#i chose to only include the lowest value for prizes remaining. may not be correct
+
+mi_game_data <- data$data$getRetailTopPrizesRemainingByGameType %>% unnest(cols = c(prizesRemainingData)) %>% 
+  filter(game_name %in% game_name[!str_detect(game_name, ".*ONLN.*")]) %>% 
+  group_by(cms_game_igt_id, prize_level) %>% 
+  slice_min(prizes_remaining) %>% 
+  ungroup() %>% 
+  mutate(game_number = cms_game_igt_id) %>% 
+  mutate(ticket_price = str_sub(game_name, start = -3L, end = -1L) %>% str_replace_all("[^0-9]","") %>% as.numeric()) %>% 
+  mutate(state = "MI") %>% 
+  mutate(scrape_date = today()) %>% 
+  mutate(prize_amount = prize_amount %>% as.numeric()) %>% 
+  mutate(total_prizes = starting_amount %>% as.numeric()) %>% 
+  mutate(prizes_remaining = prizes_remaining %>% as.numeric()) %>% 
+  mutate(prizes_claimed = total_prizes - prizes_remaining) %>% 
+  left_join(odds_list, by = "game_number") %>% 
+  relocate(prize_amount, .after = scrape_date) %>% 
+  relocate(prizes_remaining, .after = total_prizes) %>% 
+  select(game_number:overall_odds)
+
+mi_end <- Sys.time()
+
+mi_time <- c("MI",as.numeric(difftime(mi_end,mi_start,units = "mins")))
+time_to_run <- bind_rows(time_to_run,data.frame(state = mi_time[1], time = mi_time[2]))
+
+# COMPILE ALL STATE TO 1 DATAFRAME ####
+
+game_data <- bind_rows(fl_game_data, 
+                       nc_game_data, 
+                       tx_game_data, 
+                       il_game_data, 
+                       ct_game_data, 
+                       ny_game_data,
+                       ca_game_data,
+                       ma_game_data,
+                       la_game_data,
+                       ar_game_data,
+                       ks_game_data,
+                       ky_game_data,
+                       mi_game_data)
+
+
+setwd("/Users/jennaryan/Documents/GitHub/all_lotto_states/daily_csv")
+write.csv(game_data,paste0("all_state_csv-",today()))
+
+
+# STATE GAME NAMES ####
+
+game_names <- data.frame()
+
+
+## FL ####
+fl_names_url <- "https://www.flalottery.com/remainingPrizes"
+
+fl_names <- read_html(fl_names_url) %>% html_nodes("table") %>% html_table() %>% .[[1]] %>% 
+  select(1,2) %>% 
+  mutate(state = "FL") %>% 
+  mutate(game_number = as.numeric(`Game Number`)) %>% 
+  mutate(game_name = `Game Name`) %>% 
+  select(state:game_name)
+
+game_names <- bind_rows(game_names, fl_names)
+
+## TX ####
+tx_names_url <- "https://www.texaslottery.com/export/sites/lottery/Games/Scratch_Offs/all.html"
+
+tx_names <- read_html(tx_names_url) %>% html_nodes("table") %>% html_table() %>% .[[1]] %>%
+  select(`Game Number`, `Game Name`) %>% 
+  drop_na() %>% 
+  mutate(state = 'TX') %>% 
+  mutate(game_number = as.numeric(`Game Number`)) %>% 
+  mutate(game_name = `Game Name`) %>% 
+  select(state:game_name)
+
+game_names <- bind_rows(game_names, tx_names)
+
+## NC ####
+
+nc_names_url <- "https://nclottery.com/scratch-off-prizes-remaining"
+
+nc_names <- data.frame(
+  state = "NC",
+  game_number = c(read_html(nc_names_url) %>% html_nodes(".gamenumber") %>% html_text2() %>% 
+                    str_extract("\\d+") %>% as.numeric()),
+  game_name = c(read_html(nc_names_url) %>% html_nodes(".gamename") %>% html_text2() %>% 
+                  str_replace_all("â","'") %>% str_replace_all("â¢","") %>% 
+                  str_replace_all("Â","")))
+
+game_names <- bind_rows(game_names, nc_names)
+
+
+## IL ####
+
+il_names_url <- "https://www.illinoislottery.com/about-the-games/unpaid-instant-games-prizes"
+
+il_names <- read_html(il_names_url) %>% html_nodes("table") %>% html_table() %>% .[[1]] %>% select(1,3) %>% 
+  mutate(state = "IL") %>% 
+  mutate(game_number = str_split(.[[2]],"[(]", simplify = TRUE) %>% .[,1] %>% as.numeric()) %>% 
+  mutate(game_name = str_split(.[[1]]," \\(", simplify = TRUE) %>% .[,1]) %>% 
+  select(3,4,5) %>% 
+  drop_na()
+
+game_names <- bind_rows(game_names, il_names)
+
+## CT ####
+
+ct_names_url <- "https://www.ctlottery.org/ScratchGamesTable"
+
+ct_names <- read_html(ct_names_url) %>% html_nodes("table") %>% html_table() %>% .[[1]] %>% select(1,2) %>% 
+  mutate(state = "CT") %>% 
+  mutate(game_number = as.numeric(Game)) %>% 
+  mutate(game_name = `Game Name`) %>% 
+  select(3:5)
+
+game_names <- bind_rows(game_names, ct_names)
+
+
+## CA ####
+
+ca_names_url <- "https://www.calottery.com/api/games/scratchers"
+
+response <- GET(ca_names_url)
+data <- fromJSON(rawToChar(response$content))
+game <- data$games
+
+ca_name_data <- game %>% unnest(prizeTiers) %>% 
+  filter(state == "Active") %>% 
+  select(7,13) %>% 
+  mutate(state = "CA") %>% 
+  rename(game_number = gameNumber,
+         game_name = name) %>% 
+  relocate(state, .before = game_number)
+
+game_names <- bind_rows(game_names, ca_name_data)
+
+## MA ####
+
+ma_names_url <- "https://www.masslottery.com/api/v1/games"
+
+ma_name_data <- fromJSON(ma_names_url) %>% 
+  select(id, name, gameType) %>% 
+  filter(gameType == "Scratch") %>% 
+  mutate(state = "MA") %>% 
+  select(state,id, name) %>% 
+  rename(game_number = id,
+         game_name = name)
+
+game_names <- bind_rows(game_names, ma_name_data)
+
+## LA ####
+
+la_names_url <- "https://louisianalottery.com/scratch-offs/top-prizes-remaining"
+
+la_name_data <- read_html(la_names_url) %>% html_nodes("table") %>% html_table() %>% .[[1]] %>% 
+  select(1,2) %>% 
+  mutate(state = "LA") %>% 
+  mutate(game_number = No. %>% as.numeric(),
+         game_name = `Game Name`) %>% 
+  select(3:5)
+
+game_names <- bind_rows(game_names, la_name_data)
+
+## NY ####
+
+ny_json_names <- "https://data.ny.gov/resource/nzqa-7unk.json"
+
+ny_name_data <- fromJSON(ny_json) %>% select(1,2) %>% 
+  distinct() %>% 
+  mutate(state = "NY") %>% 
+  mutate(game_number = game_number %>% as.numeric()) %>% 
+  relocate(state, .before = game_number)
+
+game_names <- bind_rows(game_names, ny_name_data)
+
+## KS ####
+
+ks_url1 <- "https://www.kslottery.com/games/instantgameslist"
+
+ks_name_data <- ks_url1 %>% read_html() %>% html_nodes("table") %>% html_table() %>% .[[2]] %>% 
+  filter(X4 == "S") %>% select(2:3) %>% 
+  mutate(state = "KS") %>% 
+  rename(game_number = X2,
+         game_name = X3) %>% 
+  relocate(state, .before = game_number) %>% 
+  mutate(game_number = game_number %>% as.numeric())
+
+game_names <- bind_rows(game_names, ks_name_data)
+
+## KY ####
+ky_name_url <- "https://www.kylottery.com/apps/scratch_offs/available_games.html"
+
+ky_name_data <- ky_name_url %>% read_html() %>% html_nodes(".panel-title") %>% html_text2() %>% str_split(" - ",simplify = TRUE) %>% 
+  data.frame() %>% 
+  rename(game_name = X1,
+         game_number = X2) %>% 
+  mutate(game_number = as.numeric(game_number)) %>% 
+  mutate(state = "KY") %>% 
+  relocate(state, .before = game_name) %>% 
+  relocate(game_number, .before = game_name)
+
+game_names <- bind_rows(game_names, ky_name_data)
+
+## MI ####
+
+mi_name_data <- data2$data$getCMSGames %>% 
+  select(name, igtId) %>% 
+  mutate(state = "MI") %>% 
+  mutate(game_number = igtId %>% as.numeric()) %>% 
+  mutate(game_name = name) %>% 
+  select(state:game_name) %>% 
+  drop_na()
+
+game_names <- bind_rows(game_names, mi_name_data)
+
+
+## GAME NAME COMPILE ####
+
+game_names <- distinct(game_names)
+getwd()
+setwd("/Users/jennaryan/Documents/GitHub/all_lotto_states")
+write.csv(game_names,"game_name_list.csv", row.names = FALSE)

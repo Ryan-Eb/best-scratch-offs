@@ -13,7 +13,7 @@ Our website offers comprehensive data analysis and insights into the odds of win
 
 To get started, select your state from the list below or on the navbar at the top of the page to access state-specific information and odds:
 
-We currently have data on the states highlighted in orange on the map below and our regularly adding more states
+We currently have data on the states highlighted in orange on the map below and continuously adding more states.
 
 ```{r include=FALSE}
 
@@ -61,15 +61,19 @@ leaflet_map <- leaflet() %>%
   addProviderTiles(provider = providers$Stamen.TonerLite) %>%
   addPolygons(data = us_states,
               fillColor = ifelse(us_states$names %>% str_split(":", simplify = TRUE) %>% 
-                                   .[,1] %in% state_map_data$state, "orange", "white"),
+                                   .[,1] %in% state_map_data$state, "orange", 
+                        ifelse(us_states$names %in% c("alabama","nevada","utah"),"grey","white")),
               color = "grey", weight = 1,
               opacity = 1, fillOpacity = .6,
               stroke = TRUE,
-              # Bind the popup to display the state data
+              highlightOptions = highlightOptions(stroke = 4, weight = 3, color = "black"),
               layerId = ~us_states$names,
               group = "states") %>%
   # Set the initial view to show the entire US
-  setView(lng = -95.7, lat = 37, zoom = 4)
+  setView(lng = -95.7, lat = 37, zoom = 4) %>% 
+  addLegend(position = "bottomleft",
+            colors = c("orange","grey","white"),
+            labels = c("Data Available","No State Lottery","No Data Yet"))
 
 jsCode <- paste0('
  function(el, x, data) {
@@ -78,7 +82,7 @@ jsCode <- paste0('
     (function(){
       var v = data.url[i];
       if(v !== null && v !== undefined) {
-        marker[i].addEventListener("click", function() { window.open(v);}, false);
+        marker[i].addEventListener("click", function() { window.location.href = (v);}, false);
       }
   }()); 
   }
@@ -91,11 +95,11 @@ jsCode <- paste0('
 ```
 
 |                                                      |                                                        |                                                         |
-|------------------------------------------------------|--------------------------------------------------------|---------------------------------------------------------|
-| [California](https://best-scratch-offs.com/ca.html)  | [Illinois](https://best-scratch-offs.com/il.html)      | [North Carolina](https://best-scratch-offs.com/nc.html) |
-| [Connecticut](https://best-scratch-offs.com/ct.html) | [Massachusetts](https://best-scratch-offs.com/ma.html) | [Texas](https://best-scratch-offs.com/tx.html)          |
+|-----------------------|------------------------|-------------------------|
+| [Arkansas](https://best-scratch-offs.com/ar.html)    | [Illinois](https://best-scratch-offs.com/il.html)      | [North Carolina](https://best-scratch-offs.com/nc.html) |
+| [California](https://best-scratch-offs.com/ca.html)  | [Louisiana](https://best-scratch-offs.com/la.html)     | [Texas](https://best-scratch-offs.com/tx.html)          |
+| [Connecticut](https://best-scratch-offs.com/ct.html) | [Massachusetts](https://best-scratch-offs.com/ma.html) |                                                         |
 | [Florida](https://best-scratch-offs.com/fl.html)     | [New York](https://best-scratch-offs.com/ny.html)      |                                                         |
-|                                                      |                                                        |                                                         |
 
 We analyze data from current and previous scratch-off games to help you identify the best games to play. Our goal is to provide you with the best possible chances of winning by offering data-driven recommendations.
 

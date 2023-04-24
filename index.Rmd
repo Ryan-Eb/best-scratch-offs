@@ -82,7 +82,7 @@ jsCode <- paste0('
     (function(){
       var v = data.url[i];
       if(v !== null && v !== undefined) {
-        marker[i].addEventListener("click", function() { window.open(v);}, false);
+        marker[i].addEventListener("click", function() { window.location.href = (v);}, false);
       }
   }()); 
   }
@@ -96,10 +96,10 @@ jsCode <- paste0('
 
 |                                                      |                                                        |                                                         |
 |-----------------------|------------------------|-------------------------|
-| [California](https://best-scratch-offs.com/ca.html)  | [Illinois](https://best-scratch-offs.com/il.html)      | [North Carolina](https://best-scratch-offs.com/nc.html) |
-| [Connecticut](https://best-scratch-offs.com/ct.html) | [Massachusetts](https://best-scratch-offs.com/ma.html) | [Texas](https://best-scratch-offs.com/tx.html)          |
+| [Arkansas](https://best-scratch-offs.com/ar.html)    | [Illinois](https://best-scratch-offs.com/il.html)      | [North Carolina](https://best-scratch-offs.com/nc.html) |
+| [California](https://best-scratch-offs.com/ca.html)  | [Louisiana](https://best-scratch-offs.com/la.html)     | [Texas](https://best-scratch-offs.com/tx.html)          |
+| [Connecticut](https://best-scratch-offs.com/ct.html) | [Massachusetts](https://best-scratch-offs.com/ma.html) |                                                         |
 | [Florida](https://best-scratch-offs.com/fl.html)     | [New York](https://best-scratch-offs.com/ny.html)      |                                                         |
-|                                                      |                                                        |                                                         |
 
 We analyze data from current and previous scratch-off games to help you identify the best games to play. Our goal is to provide you with the best possible chances of winning by offering data-driven recommendations.
 
