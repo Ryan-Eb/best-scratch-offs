@@ -27,6 +27,8 @@ navbar:
           href: ny.html
         - text: "North Carolina"
           href: nc.html
+        - text: "Oklahoma"
+          href: ok.html
         - text: "Texas"
           href: tx.html
 
